@@ -1,19 +1,21 @@
 import React, {useEffect, useState} from "react";
+import axios from "axios";
 import './EditItemForm.css';
 import Button from "../../Button/Button";
 
-const EditForm = props => {
-    const [item_id, setItemId] = useState('');
+const EditItemForm = props => {
+    const [category_id, setCategoryId] = useState('');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const [quantity, setQuantity] = useState('');
     const [sku, setSku] = useState('');
-    const [category_id, setCategoryId] = useState('');
     const [item, setItem] = useState({});
 
+    const [selectedCategory, setSelectedCategory] = useState({});
+    const [categories , setCategories] = useState([]);
+
     useEffect(()=>{
-        setItemId(props.item.item_id);
         setTitle(props.item.title);
         setDescription(props.item.description);
         setPrice(props.item.price);
@@ -47,9 +49,14 @@ const EditForm = props => {
         console.log("_detectSkuTextChanged event fired");
     }
 
+    const _detectCategoryTextChanged = (key, value) => {
+        setSelectedCategory(value);
+        setCategoryId(value)
+      };
+
+      
     useEffect(() => {
         setItem({
-            'item_id': item_id,
             'title': title,
             'description': description,
             'price': price,
@@ -60,6 +67,16 @@ const EditForm = props => {
         console.log("setItem Changed");
     }, [title, description, price, quantity, sku, category_id]);
 
+    useEffect(() => {
+        axios.get('http://127.0.0.1:3001/categories')
+          .then(res => {
+            setCategories(res.data.categories);
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }, []);
+
     const _edit = () => {
         console.log("EditItemForm _edit triggered");
         props.onEditItem(item);
@@ -68,13 +85,13 @@ const EditForm = props => {
 
     const _clear = () => {
         setItem({});
-        setItemId('');
         setTitle('');
         setDescription('');
         setPrice('');
         setQuantity('');
         setSku('');
         setCategoryId('');
+        setSelectedCategory('');
         console.log("_clear event fired");
     }
     return(
@@ -86,10 +103,10 @@ const EditForm = props => {
               onChange={e => _detectTitleTextChanged('title', e.target.value)} />
             <br />
             <label>Category:</label>
-            <select value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+            <select value={selectedCategory} onChange={e => _detectCategoryTextChanged('Category', e.target.value)}>
                 <option value="">Select category</option>
                 {categories.map(category => (
-                    <option key={category.id} value={category.category_name}>{category.category_name}</option>
+                    <option key={category.category_id} value={category.category_name}>{category.category_name}</option>
                 ))}
             </select>
             <br/>
@@ -111,4 +128,4 @@ const EditForm = props => {
         </div>
     );
 }
-export default EditForm;
+export default EditItemForm;

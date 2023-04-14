@@ -12,3 +12,4 @@ const CategoryTableRow = props => {
     );
 }
 export default CategoryTableRow;
+
